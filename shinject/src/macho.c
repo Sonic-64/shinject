@@ -41,14 +41,14 @@ if(strcmp(seg32->segname,"__TEXT")==0){
 if(load->cmd == LC_MAIN ){
 entry = (entry_point_command*)load;
 }
-    load = (load_command *)(load + load->cmd_size );
+    load = (load_command *)(load + load->cmdsize );
 }
 sec32 = (section *)(text_seg32 + sizeof(segment_command));
     for(i = 0 ; i < text_seg32->nsec ; i++)
     {
         if (strcmp(sec32->secname,"__text" ))
         break;
-        sec32++
+        sec32++;
     }
     unsigned long offset = sec32->fileoff;
     uint32_t count = 0;
@@ -80,13 +80,13 @@ for ( i = 0 ; i < sec32->filesize ; i++){
 }
 if(machine_type==0xFEEDFACF){
     mach_header_64 *mach_hdr64 = (mach_header_64*)mach_o;
-    segment_command_64 *segment_command_64;
+    segment_command_64 *seg64;
     segment_command_64 *text_seg64;
-    section_64 *section_64;
+    section_64 *sec64;
 
     load = (load_command*) (mach_o + sizeof(mach_header_64));
     for( i = 0 ; i < mach_hdr64->ncmds ; i++){
-    if(load->cmd ==LC_SEGMENT64){
+    if(load->cmd ==LC_SEGMENT_64){
     seg64 = (segment_command_64*) load;
     if(strcmp(seg64->segname,"__TEXT")==0){
         text_seg64 = seg64;
@@ -96,14 +96,14 @@ if(machine_type==0xFEEDFACF){
     if(load->cmd == LC_MAIN ){
     entry = (entry_point_command*)load;
     }
-        load = (load_command *)(load + load->cmd_size );
+        load = (load_command *)(load + load->cmdsize );
     }
     sec64 = (section_64 *)(text_seg64 + sizeof(segment_command_64));
         for(i = 0 ; i < text_seg64->nsec ; i++)
         {
-            if (strcmp(section_64->secname,"__text" ))
+            if (strcmp(sec64->secname,"__text" ))
             break;
-            sec64++
+            sec64++;
         }
         unsigned long offset = sec64->fileoff;
         uint32_t count = 0;
@@ -138,3 +138,4 @@ if(machine_type==0xFEEDFACF){
 
 return -1;
 }
+

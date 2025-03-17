@@ -1,5 +1,5 @@
 #include "util.h"
-unsigned long align(uint32_t size, uint32_t align, uint32_t addr){
+uint32_t align(uint32_t size, uint32_t align, uint32_t addr){
     if (!(size % align))
         return addr + size;
     return addr + (size / align + 1) * align;
@@ -36,7 +36,7 @@ char *load_file(char *file_name,uint32_t *size){
 
     CloseHandle(hFile);
     return load;
-#elif
+#else
 int fd = open(file_name, O_RDONLY);
 if (fd == -1) {
     return NULL;
@@ -119,8 +119,8 @@ int write_data(char *file_name,uint32_t offset , char *data, uint32_t lenght){
 
     CloseHandle(hFile);
     return (int)bytesWritten;
-    #elif 
-    int fd = open(filename, O_WRONLY | O_CREAT, 0644);
+    #else
+    int fd = open(file_name, O_WRONLY | O_CREAT, 0644);
     if (fd == -1) {
         perror("Failed to open file");
         return -1;
@@ -131,7 +131,7 @@ int write_data(char *file_name,uint32_t offset , char *data, uint32_t lenght){
         return -1;
     }
 
-    ssize_t bytes_written = write(fd, data, length);
+    ssize_t bytes_written = write(fd, data, lenght);
     if (bytes_written == -1) {
 return -1;
     }
@@ -161,7 +161,7 @@ int extend_file(char *file_name,uint32_t size){
     CloseHandle(hFile);
     return 0;
 
-#elif
+#else
 int fd = open(file_name, O_WRONLY);
 if (fd == -1) {
     return -1;
@@ -180,7 +180,7 @@ return 0;
 
 
 }
-char *applysuffix(char *shellcode,int shellcode_lenght,uint32_t entry, uint32_t vaddr ){
+char *apply_suffix(char *shellcode,int shellcode_lenght,uint32_t entry, uint32_t vaddr ){
     uint32_t entry_point = entry-(vaddr + shellcode_lenght +5);
     char *payload = malloc(shellcode_lenght + 5);
 

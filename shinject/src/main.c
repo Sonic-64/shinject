@@ -2,14 +2,14 @@
 #include "shinject.h"
 int main (int argc , char *argv[]){
 
-
     if(argc<3){
         printf("not all arguments provided ");
         return -1;
 
     }
-    int ret;
+    int ret = 0;
     uint32_t shellcode_len;
+    
 char *shellcode = load_file(argv[2],&shellcode_len);
     int type = file_type(argv[1]);
     if(type == ELF){

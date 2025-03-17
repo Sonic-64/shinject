@@ -1,9 +1,13 @@
 #ifndef UTIL_H
+#include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdint.h>
 #ifdef _WIN32
 #include <windows.h>
-#elif
+#else
+#include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
 #endif
@@ -15,7 +19,7 @@ char *load_file(char *file_name,uint32_t *size);
 int file_type(char *file_name);
 int write_data(char *file_name,uint32_t offset , char *data, uint32_t lenght);
 int extend_file(char *file_name,uint32_t size);
-char *applysuffix(char *shellcode,int shellcode_lenght,uint32_t entry, uint32_t vaddr );
+char *apply_suffix(char *shellcode,int shellcode_lenght,uint32_t entry, uint32_t vaddr );
 
 
 #define UTIL_H

