@@ -1,4 +1,9 @@
 #include "pe.h"
+
+int PE_sign(char *file_name , char *signature){
+
+
+}
 int PE_code_cave(char *file_name, char *shellcode ,int shellcode_len){
     uint32_t vaddr;
     uint64_t oryginal_entry;

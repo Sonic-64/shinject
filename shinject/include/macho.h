@@ -6,7 +6,7 @@
 #define LC_SEGMENT      0x1  
 #define LC_SEGMENT_64   0x19 
 #define LC_MAIN         0x80000028 
-
+#define LC_CODE_SIGNATURE 0x1D
 #define MH_MAGIC    0xFEEDFACE  
 #define MH_MAGIC_64 0xFEEDFACF  
 

