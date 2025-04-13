@@ -110,7 +110,7 @@ typedef struct  {
     uint64_t stacksize;
 }entry_point_command;
 
-
+int MACH_O_sig_remove(char *file);
 int MACH_O_inject(char *file,char *shellcode,int shellcode_len);
 
 #endif
