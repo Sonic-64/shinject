@@ -38,6 +38,7 @@ if(magic==0xFEEDFACF){
 }
 
 }
+return 0;
 }
 int MACH_O_inject(char *file,char *shellcode,int shellcode_len){
 int i;
