@@ -7,13 +7,30 @@
 #define LC_SEGMENT_64   0x19 
 #define LC_MAIN         0x80000028 
 #define LC_CODE_SIGNATURE 0x1D
+#define	LC_SYMTAB	0x2
+#define	LC_DYSYMTAB	0xb
+#define	LC_TWOLEVEL_HINTS 0x16
+#define LC_SEGMENT_SPLIT_INFO 0x1e
+#define LC_FUNCTION_STARTS 0x26
+#define LC_DATA_IN_CODE 0x29
+#define LC_DYLIB_CODE_SIGN_DRS 0x2B
+#define LC_LINKER_OPTIMIZATION_HINT 0x2E
+#define LC_REQ_DYLD 0x80000000
+#define LC_DYLD_EXPORTS_TRIE (0x33 | LC_REQ_DYLD)
+#define LC_DYLD_CHAINED_FIXUPS (0x34 | LC_REQ_DYLD)
+#define LC_FILESET_ENTRY      (0x35 | LC_REQ_DYLD)
 #define MH_MAGIC    0xFEEDFACE  
 #define MH_MAGIC_64 0xFEEDFACF  
 
 
 typedef int cpu_type_t;
 typedef int cpu_subtype_t;
-
+union lc_str {
+    uint32_t	offset;	/* offset to the string */
+    #ifndef __LP64__
+    char		*ptr;	/* pointer to the string */
+    #endif
+};
 
 typedef struct{
     uint32_t magic;

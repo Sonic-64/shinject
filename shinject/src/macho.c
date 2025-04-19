@@ -1,11 +1,18 @@
 #include "macho.h"
 int MACH_O_sig_remove(char *file){
 int i,j;
-unsigned long long size;
+uint32_t size;
 uint32_t magic;
-char *mach_o = load_file(file, &size)
+uint32_t sig_offset;
+uint32_t sig_size;
+char *mach_o = load_file(file, &size);
 load_command *load;
-
+dysymtab_command *dysymtab;
+symtab_command *symtab;
+twolevel_hints_command *hints;
+linkedit_data_command *ld;
+linkedit_data_command *sig = NULL;
+fileset_entry_command *fe;
 uint32_t cmdsize;
 memcpy(&magic,mach_o,sizeof(uint32_t));
 if(magic==0xFEEDFACE){
@@ -13,15 +20,86 @@ if(magic==0xFEEDFACE){
    load = (load_command*) (mach_o + sizeof(mach_header));
    for (i = 0; i < mach_hdr32->ncmds; i++){
     if(load->cmd == LC_CODE_SIGNATURE){
-    break;
+        sig = (linkedit_data_command*)load;
+        sig_offset = sig->dataoff;
+        sig_size = sig->datasize;
+        mach_hdr32->ncmds--;
+        mach_hdr32->sizeofcmds-=sig_size;
+        break;
     }
    load = (load_command*)(load + load->cmdsize);
 }
+if(sig == NULL){
+    return -1;
+}
 load = (load_command*) (mach_o + sizeof(mach_header));
 for (i = 0; i < mach_hdr32->ncmds; i++){
+    if(load->cmd == LC_SYMTAB){
+        symtab = (symtab_command *)(load);
+        if (symtab->symoff > sig_offset) {
+            symtab->symoff -= sig_size;
+        }
+        if (symtab->stroff > sig_offset) {
+            symtab->stroff -= sig_size;
+        }
+    }
+    if (load->cmd == LC_DYSYMTAB) {
+       dysymtab = (dysymtab_command *)(load);
+        if (dysymtab->tocoff > sig_offset) {
+            dysymtab->tocoff -= sig_size;
+        }
+        if (dysymtab->modtaboff > sig_offset) {
+            dysymtab->modtaboff -= sig_size;
+        }
+        if (dysymtab->extrefsymoff > sig_offset) {
+            dysymtab->extrefsymoff -= sig_size;
+        }
+        if (dysymtab->indirectsymoff > sig_offset) {
+            dysymtab->indirectsymoff -= sig_size;
+        }
+        if (dysymtab->extreloff > sig_offset) {
+            dysymtab->extreloff -= sig_size;
+        }
+        if (dysymtab->locreloff > sig_offset) {
+            dysymtab->locreloff -= sig_size;
+        }
+    }
+    if (load->cmd == LC_TWOLEVEL_HINTS) {
+        hints = (twolevel_hints_command *)(load);
 
+        if (hints->offset > sig_offset) {
+            hints->offset -= sig_size;
+        }
+
+    }
+    if (load->cmd == LC_SEGMENT_SPLIT_INFO ||
+        load->cmd == LC_FUNCTION_STARTS ||
+        load->cmd == LC_DATA_IN_CODE ||
+        load->cmd == LC_DYLIB_CODE_SIGN_DRS ||
+        load->cmd == LC_LINKER_OPTIMIZATION_HINT ||
+        load->cmd == LC_DYLD_EXPORTS_TRIE ||
+        load->cmd == LC_DYLD_CHAINED_FIXUPS) {
+
+        ld = (linkedit_data_command *)(load);
+    if (ld->dataoff > sig_offset){
+        ld->dataoff -= sig_size;
+    }
+        }
+        if (load->cmd == LC_FILESET_ENTRY) {
+            fe = (fileset_entry_command *)load;
+
+            if (fe->fileoff > sig_offset) {
+                fe->fileoff -= sig_size;
+            }
+        }
     if(load->cmd == LC_SEGMENT){
-
+        segment_command *seg32 = (segment_command *)(load);
+        if(seg32->fileoff > sig_offset)seg32->fileoff -= sig_size;
+        section *sect32 = (section *)(seg32 + 1);
+        for (j = 0; j < seg32->nsec; j++) {
+            if (sect32->fileoff > sig_offset) sect32->fileoff -= sig_size;
+            sect32++;
+        }
     }
 
     load = (load_command*)(load + load->cmdsize);
@@ -32,26 +110,95 @@ if(magic==0xFEEDFACF){
    load = (load_command *) (mach_o + sizeof(mach_header_64));
    for (i = 0; i < mach_hdr64->ncmds; i++){
     if (load->cmd == LC_CODE_SIGNATURE){
+        sig = (linkedit_data_command*)load;
+        sig_offset = sig->dataoff;
+        sig_size = sig->datasize;
+        mach_hdr64->ncmds--;
+        mach_hdr64->sizeofcmds-=sig_size;
         break;
     }
    load = (load_command *)(load +load->cmdsize);
    }
-
+   if(sig == NULL){
+       return -1;
+   }
 load = (load_command *) (mach_o + sizeof(mach_header_64));
 for (i = 0; i < mach_hdr64->ncmds; i++){
+    if(load->cmd == LC_SYMTAB){
+        symtab = (symtab_command *)(load);
+        if (symtab->symoff > sig_offset) {
+            symtab->symoff -= sig_size;
+        }
+        if (symtab->stroff > sig_offset) {
+            symtab->stroff -= sig_size;
+        }
+    }
+    if (load->cmd == LC_DYSYMTAB) {
+        dysymtab = (dysymtab_command *)(load);
+        if (dysymtab->tocoff > sig_offset) {
+            dysymtab->tocoff -= sig_size;
+        }
+        if (dysymtab->modtaboff > sig_offset) {
+            dysymtab->modtaboff -= sig_size;
+        }
+        if (dysymtab->extrefsymoff > sig_offset) {
+            dysymtab->extrefsymoff -= sig_size;
+        }
+        if (dysymtab->indirectsymoff > sig_offset) {
+            dysymtab->indirectsymoff -= sig_size;
+        }
+        if (dysymtab->extreloff > sig_offset) {
+            dysymtab->extreloff -= sig_size;
+        }
+        if (dysymtab->locreloff > sig_offset) {
+            dysymtab->locreloff -= sig_size;
+        }
+    }
+    if (load->cmd == LC_TWOLEVEL_HINTS) {
+        hints = (twolevel_hints_command *)(load);
 
-    if(load->cmd == LC_SEGMENT_64){
+        if (hints->offset > sig_offset){
+            hints->offset -= sig_size;
+        }
+    }
+    if (load->cmd == LC_SEGMENT_SPLIT_INFO ||
+        load->cmd == LC_FUNCTION_STARTS ||
+        load->cmd == LC_DATA_IN_CODE ||
+        load->cmd == LC_DYLIB_CODE_SIGN_DRS ||
+        load->cmd == LC_LINKER_OPTIMIZATION_HINT ||
+        load->cmd == LC_DYLD_EXPORTS_TRIE ||
+        load->cmd == LC_DYLD_CHAINED_FIXUPS) {
 
+        ld = (linkedit_data_command *)(load);
+        if (ld->dataoff > sig_offset){
+            ld->dataoff -= sig_size;
+        }
+        }
+        if (load->cmd == LC_FILESET_ENTRY) {
+            fe = (fileset_entry_command *)load;
+
+            if (fe->fileoff > sig_offset) {
+                fe->fileoff -= sig_size;
+            }
+        }
+        if(load->cmd == LC_SEGMENT_64){
+       segment_command_64 *seg64 = (segment_command_64*)(load);
+        if(seg64->fileoff > sig_offset)seg64->fileoff -= sig_size;
+        section_64 *sect64 = (section_64 *)(seg64 + 1);
+        for (j = 0; j < seg64->nsec; j++) {
+            if (sect64->fileoff > sig_offset) sect64->fileoff -= sig_size;
+            sect64++;
+        }
     }
     load = (load_command *)(load +load->cmdsize);
 }
 }
-uint32_t after_size =
-size -= removed;
-memcpy()
-}
+
+size -= sig_size;
+memmove(mach_o + sig_offset,mach_o + sig_offset + sig_size,size - sig_offset - sig_size);
 return 0;
 }
+
 int MACH_O_inject(char *file,char *shellcode,int shellcode_len){
 int i;
 uint32_t size;
