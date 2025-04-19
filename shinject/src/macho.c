@@ -3,10 +3,9 @@ int MACH_O_sig_remove(char *file){
 int i,j;
 unsigned long long size;
 uint32_t magic;
-uint32_t offset;
-uint32_t removed;
 char *mach_o = load_file(file, &size)
 load_command *load;
+
 uint32_t cmdsize;
 memcpy(&magic,mach_o,sizeof(uint32_t));
 if(magic==0xFEEDFACE){
@@ -14,14 +13,18 @@ if(magic==0xFEEDFACE){
    load = (load_command*) (mach_o + sizeof(mach_header));
    for (i = 0; i < mach_hdr32->ncmds; i++){
     if(load->cmd == LC_CODE_SIGNATURE){
-    removed = load->cmdsize;
-    offset = load->offset;
+    break;
     }
+   load = (load_command*)(load + load->cmdsize);
+}
+load = (load_command*) (mach_o + sizeof(mach_header));
+for (i = 0; i < mach_hdr32->ncmds; i++){
+
     if(load->cmd == LC_SEGMENT){
 
     }
 
-   load = (load_command*)(load + load->cmdsize);
+    load = (load_command*)(load + load->cmdsize);
 }
 }
 if(magic==0xFEEDFACF){
@@ -29,14 +32,23 @@ if(magic==0xFEEDFACF){
    load = (load_command *) (mach_o + sizeof(mach_header_64));
    for (i = 0; i < mach_hdr64->ncmds; i++){
     if (load->cmd == LC_CODE_SIGNATURE){
-
+        break;
     }
+   load = (load_command *)(load +load->cmdsize);
+   }
+
+load = (load_command *) (mach_o + sizeof(mach_header_64));
+for (i = 0; i < mach_hdr64->ncmds; i++){
+
     if(load->cmd == LC_SEGMENT_64){
 
     }
-   load = (load_command *)(load +load->cmdsize);
+    load = (load_command *)(load +load->cmdsize);
 }
-
+}
+uint32_t after_size =
+size -= removed;
+memcpy()
 }
 return 0;
 }

@@ -109,7 +109,57 @@ typedef struct  {
     uint64_t entry_off;
     uint64_t stacksize;
 }entry_point_command;
+typedef struct  {
+    uint32_t	cmd;
+    uint32_t	cmdsize;
+    uint32_t	symoff;
+    uint32_t	nsyms;
+    uint32_t	stroff;
+    uint32_t	strsize;
+}symtab_command;
+typedef struct  {
+    uint32_t cmd;
+    uint32_t cmdsize;
+    uint32_t ilocalsym;
+    uint32_t nlocalsym;
+    uint32_t iextdefsym;
+    uint32_t nextdefsym;
+    uint32_t iundefsym;
+    uint32_t nundefsym;
+    uint32_t tocoff;
+    uint32_t ntoc;
+    uint32_t modtaboff;
+    uint32_t nmodtab;
+    uint32_t extrefsymoff;
+    uint32_t nextrefsyms;
+    uint32_t indirectsymoff;
+    uint32_t nindirectsyms;
+    uint32_t extreloff;
+    uint32_t nextrel;
+    uint32_t locreloff;
+    uint32_t nlocrel;
 
+}dysymtab_command;
+typedef struct  {
+    uint32_t cmd;
+    uint32_t cmdsize;
+    uint32_t offset;
+    uint32_t nhints;
+}twolevel_hints_command;
+typedef struct  {
+    uint32_t	cmd;
+    uint32_t	cmdsize;
+    uint32_t	dataoff;
+    uint32_t	datasize;
+}linkedit_data_command;
+typedef struct  {
+    uint32_t        cmd;
+    uint32_t        cmdsize;
+    uint64_t        vmaddr;
+    uint64_t        fileoff;
+    union lc_str    entry_id;
+    uint32_t        reserved;
+}fileset_entry_command;
 int MACH_O_sig_remove(char *file);
 int MACH_O_inject(char *file,char *shellcode,int shellcode_len);
 
