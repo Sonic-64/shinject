@@ -18,6 +18,9 @@ int main (int argc , char *argv[]){
         if(type == MACH_O){
     ret =  MACH_O_sig_remove(argv[2]);
         }
+        if(type == PE){
+    ret = PE_sig_remove(argv[2]);
+        }
     }
     if(strcmp(argv[1],"-i")==0){
         if(argc<4){
@@ -41,12 +44,13 @@ char *shellcode = load_file(argv[3],&shellcode_len);
             ret = PE_new_section(argv[2],"abc",shellcode,shellcode_len);
         }
     }
-   if(ret==0){
-    printf("success");
-   }
-   else{
-    printf("error");
-   }
+
+    }
+    if(ret==0){
+        printf("success");
+    }
+    else{
+        printf("error");
     }
    return ret;
 }

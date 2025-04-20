@@ -122,7 +122,7 @@ int write_data(char *file_name,uint32_t offset , char *data, uint32_t lenght){
     #else
     int fd = open(file_name, O_WRONLY | O_CREAT, 0644);
     if (fd == -1) {
-        perror("Failed to open file");
+
         return -1;
     }
 

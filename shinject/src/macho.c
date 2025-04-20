@@ -30,6 +30,7 @@ if(magic==0xFEEDFACE){
    load = (load_command*)(load + load->cmdsize);
 }
 if(sig == NULL){
+    free(mach_o);
     return -1;
 }
 load = (load_command*) (mach_o + sizeof(mach_header));
@@ -120,6 +121,7 @@ if(magic==0xFEEDFACF){
    load = (load_command *)(load +load->cmdsize);
    }
    if(sig == NULL){
+       free(mach_o);
        return -1;
    }
 load = (load_command *) (mach_o + sizeof(mach_header_64));
@@ -196,6 +198,9 @@ for (i = 0; i < mach_hdr64->ncmds; i++){
 
 size -= sig_size;
 memmove(mach_o + sig_offset,mach_o + sig_offset + sig_size,size - sig_offset - sig_size);
+extend_file(file,size);
+write_data(file,0,mach_o,size);
+free(mach_o);
 return 0;
 }
 

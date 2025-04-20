@@ -132,7 +132,7 @@ typedef struct _IMAGE_NT_HEADERS {
     IMAGE_FILE_HEADER FileHeader;
     IMAGE_OPTIONAL_HEADER64 OptionalHeader;
 } IMAGE_NT_HEADERS64, *PIMAGE_NT_HEADERS64;
-
-  int PE_code_cave(char *file_name, char *shellcode ,int shellcode_len);
-  int PE_new_section(char *file_name,char *section_name,char *shellcode,int shellcode_len);
+  int PE_sig_remove(char *file );
+  int PE_code_cave(char *file, char *shellcode ,int shellcode_len);
+  int PE_new_section(char *file,char *section_name,char *shellcode,int shellcode_len);
   #endif
