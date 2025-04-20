@@ -1,4 +1,4 @@
-shinject is a C based shellcode injection library currently supporting 32bit and 64bit MACH-O/ELF/PE
+shinject is a C based shellcode injection program/library currently supporting 32bit and 64bit MACH-O/ELF/PE
 
 ## Building from source:  
 git clone https://github.com/Sonic-64/shinject.git  
