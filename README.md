@@ -12,6 +12,7 @@ make
 ./shinject_main [options]  
 
 Options:  
--rm <file_name> remove a signature from file 
+-rm <file_name> remove a signature from file  
+
 -i <file_name> <shellcode_file> inject a shellcode to file  
 
