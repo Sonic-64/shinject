@@ -177,6 +177,7 @@ typedef struct  {
     union lc_str    entry_id;
     uint32_t        reserved;
 }fileset_entry_command;
+int MACH_O_sign(char *file,char *signature);
 int MACH_O_sig_remove(char *file);
 int MACH_O_inject(char *file,char *shellcode,int shellcode_len);
 

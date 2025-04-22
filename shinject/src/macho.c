@@ -1,4 +1,8 @@
 #include "macho.h"
+int MACH_O_sign(char *file,char *signature){
+
+    return 0;
+}
 int MACH_O_sig_remove(char *file){
 int i,j;
 uint32_t size;
