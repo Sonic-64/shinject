@@ -7,6 +7,7 @@
 #define BYTE uint8_t
 #define IMAGE_SIZEOF_SHORT_NAME 8
 #define IMAGE_NUMBEROF_DIRECTORY_ENTRIES 16
+#pragma pack(push,1)
 typedef struct _IMAGE_DATA_DIRECTORY {
   DWORD VirtualAddress;
   DWORD Size;
@@ -132,6 +133,7 @@ typedef struct _IMAGE_NT_HEADERS {
     IMAGE_FILE_HEADER FileHeader;
     IMAGE_OPTIONAL_HEADER64 OptionalHeader;
 } IMAGE_NT_HEADERS64, *PIMAGE_NT_HEADERS64;
+#pragma pack(pop)
   int PE_sig_remove(char *file );
   int PE_code_cave(char *file, char *shellcode ,int shellcode_len);
   int PE_new_section(char *file,char *section_name,char *shellcode,int shellcode_len);
