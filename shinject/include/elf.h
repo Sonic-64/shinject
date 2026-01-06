@@ -9,6 +9,7 @@
 #define PF_W 2
 #define PF_R 4
 #define PT_LOAD 1
+#pragma pack(push,1)
 typedef struct {
     unsigned char   e_ident[16];
     uint16_t      e_type;
@@ -89,5 +90,6 @@ typedef struct {
     uint64_t    sh_addralign;       /* Section alignment */
     uint64_t    sh_entsize;         /* Entry size if section holds table */
 } Elf64_Shdr;
+#pragma pack(pop)
 int ELF_inject(char *file,char *shellcode, int shellcode_len);
 #endif
