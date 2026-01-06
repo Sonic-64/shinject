@@ -25,6 +25,7 @@
 
 typedef int cpu_type_t;
 typedef int cpu_subtype_t;
+#pragma pack (push,1)
 union lc_str {
     uint32_t	offset;	/* offset to the string */
     #ifndef __LP64__
@@ -177,6 +178,7 @@ typedef struct  {
     union lc_str    entry_id;
     uint32_t        reserved;
 }fileset_entry_command;
+#pragma pack(pop)
 int MACH_O_sign(char *file,char *signature);
 int MACH_O_sig_remove(char *file);
 int MACH_O_inject(char *file,char *shellcode,int shellcode_len);
